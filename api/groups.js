@@ -14,19 +14,22 @@ export default async function handler(req, res) {
     const userData = await userRes.json();
     const id = userData.data?.[0]?.id;
 
-    if (!id) return res.status(404).json({error: "User not found"});
+    if (!id) return res.json({error: "User not found"});
 
     const groupRes = await fetch(`https://groups.roproxy.com/v2/users/${id}/groups/roles`);
     const groupData = await groupRes.json();
 
-    const groups = groupData.data.map(g => ({
-      name: g.group.name,
-      role: g.role.name
-    }));
+    const groups = groupData.data
+      .map(g => `${g.group.name} - ${g.role.name}`)
+      .join(" | ");
 
-    res.json({username, id, groups});
+    res.json({
+      username,
+      id,
+      groups: groups || "No groups"
+    });
 
   } catch (e) {
-    res.status(500).json({error: "API error"});
+    res.json({error: "API error"});
   }
 }
